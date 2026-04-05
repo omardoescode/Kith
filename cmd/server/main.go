@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"kith/internal/config"
+	"kith/internal/store"
 )
 
 func main() {
@@ -17,6 +18,18 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Failed to load config:", err)
 		os.Exit(1)
 	}
+	db, err := store.Connect(store.ConnectConfig{
+		ConnectionString: cfg.ConnectionString,
+		MaxOpenConns:     cfg.DBMaxOpenConns,
+		MaxIdleConns:     cfg.DBMaxIdleConns,
+		ConnMaxLifetime:  cfg.DBConnMaxLifetime,
+		ConnMaxIdleTime:  cfg.DBConnMaxIdleTime,
+	})
+	if err != nil {
+		slog.Error("Failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
 
 	mux := http.NewServeMux()
 
