@@ -3,11 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
+
+	"kith/internal/config"
 )
 
 func main() {
+	var cfg config.Config
+	err := cfg.Load()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Failed to load config:", err)
+		os.Exit(1)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
@@ -24,9 +34,10 @@ func main() {
 
 	server := &http.Server{
 		Handler: mux,
-		Addr:    ":8000",
+		Addr:    fmt.Sprintf(":%d", cfg.Port),
 	}
 
+	slog.Info(fmt.Sprintf("Running the project on port: %d", cfg.Port))
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Fprintln(os.Stderr, "Server Failed: ", err)
 	}

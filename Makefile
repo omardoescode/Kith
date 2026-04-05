@@ -1,5 +1,5 @@
 run:
-	go run cmd/server.go
+	go run ./cmd/server
 
 lint:
 	golangci-lint run
